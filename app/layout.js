@@ -87,7 +87,7 @@ function Footer() {
                 <span className="font-black text-xl tracking-tighter text-slate-900">BLOGGER</span>
              </Link>
              <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
-                A modern publishing platform designed for performance, SEO, and the best reading experience.
+                A modern publishing platform designed for the best reading experience.
              </p>
           </div>
           
