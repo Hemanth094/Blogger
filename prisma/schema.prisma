@@ -1,0 +1,29 @@
+// This is your Prisma schema file — it defines your database tables.
+
+// Generator: creates the Prisma Client (used in your code to query the database)
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Database provider — the URL is now set in prisma.config.ts (Prisma v7+)
+datasource db {
+  provider = "mysql"
+}
+
+// ─────────────────────────────────────────────
+// Article Model — maps to the "Article" table in MySQL
+// Each field is a column in the table.
+// ─────────────────────────────────────────────
+model Article {
+  id              Int      @id @default(autoincrement()) // Auto-increment primary key
+  title           String   @db.VarChar(255)             // Article title
+  slug            String   @unique @db.VarChar(255)     // URL-friendly (unique) e.g. "my-first-post"
+  content         String   @db.LongText                 // Full article body (can be very long)
+  image           String?  @db.VarChar(500)             // Optional cover image URL
+  metaTitle       String?  @db.VarChar(60)              // SEO title (keep under 60 chars)
+  metaDescription String?  @db.VarChar(160)             // SEO description (keep under 160 chars)
+  published       Boolean  @default(false)              // Only published=true shows on public site
+  category        String   @default("General") @db.VarChar(50) // e.g. Travel, Tech, Lifestyle
+  createdAt       DateTime @default(now())              // Auto-set when record is created
+  updatedAt       DateTime @updatedAt                   // Auto-updated on every change
+}
