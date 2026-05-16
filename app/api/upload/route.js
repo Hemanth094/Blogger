@@ -8,8 +8,6 @@
 // So an image saved to /public/uploads/photo.jpg is available at /uploads/photo.jpg
 
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
 export async function POST(request) {
   try {
@@ -39,30 +37,19 @@ export async function POST(request) {
       );
     }
 
-    // Convert file to bytes
+    // Convert file to Base64
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const base64 = buffer.toString("base64");
+    
+    // Create the Data URL (e.g. data:image/jpeg;base64,...)
+    const url = `data:${file.type};base64,${base64}`;
 
-    // Create a unique filename using timestamp to avoid conflicts
-    const timestamp = Date.now();
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_"); // Sanitize filename
-    const filename = `${timestamp}_${originalName}`;
-
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true }); // recursive: true = don't error if exists
-
-    // Save the file
-    const filepath = path.join(uploadsDir, filename);
-    await writeFile(filepath, buffer);
-
-    // Return the public URL path
-    const url = `/uploads/${filename}`;
     return NextResponse.json({ url });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload file" },
+      { error: "Failed to process image upload" },
       { status: 500 }
     );
   }

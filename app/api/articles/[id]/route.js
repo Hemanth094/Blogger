@@ -8,8 +8,10 @@
 // The [id] in the folder name is a dynamic segment — Next.js passes it as params.
 
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { slugify, makeUniqueSlug } from "@/lib/slugify";
+import { getReadingTime } from "@/lib/readingTime";
 
 // ─────────────────────────────────────────────
 // GET /api/articles/[id]
@@ -70,6 +72,8 @@ export async function PUT(request, { params }) {
       });
     }
 
+    const readingTime = getReadingTime(content);
+
     const article = await prisma.article.update({
       where: { id },
       data: {
@@ -81,8 +85,13 @@ export async function PUT(request, { params }) {
         metaDescription: metaDescription?.trim()?.substring(0, 160) || null,
         published: published ?? existing.published,
         category: category || existing.category || "General",
+        readingTime,
       },
     });
+
+    // Purge cache for home and article page
+    revalidatePath("/");
+    revalidatePath(`/articles/${article.slug}`);
 
     return NextResponse.json({ article });
   } catch (error) {
@@ -109,6 +118,10 @@ export async function DELETE(request, { params }) {
     }
 
     await prisma.article.delete({ where: { id } });
+
+    // Purge cache for home and article page
+    revalidatePath("/");
+    revalidatePath(`/articles/${existing.slug}`);
 
     return NextResponse.json({ message: "Article deleted successfully" });
   } catch (error) {

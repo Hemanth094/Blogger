@@ -7,8 +7,10 @@
 // In Next.js App Router, each HTTP method is a named export function.
 
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { slugify, makeUniqueSlug } from "@/lib/slugify";
+import { getReadingTime } from "@/lib/readingTime";
 
 // ─────────────────────────────────────────────
 // GET /api/articles
@@ -88,6 +90,8 @@ export async function POST(request) {
       return !!existing; // Returns true if slug already exists
     });
 
+    const readingTime = getReadingTime(content);
+
     // ── Create in database ──
     const article = await prisma.article.create({
       data: {
@@ -99,8 +103,12 @@ export async function POST(request) {
         metaDescription: metaDescription?.trim()?.substring(0, 160) || null,
         published: published ?? false,
         category: category || "General",
+        readingTime,
       },
     });
+
+    // Purge cache for home page
+    revalidatePath("/");
 
     return NextResponse.json({ article }, { status: 201 });
   } catch (error) {

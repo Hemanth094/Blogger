@@ -90,7 +90,7 @@ export async function generateMetadata({ params }) {
     title: article.metaTitle || article.title,
 
     // DESCRIPTION: Shown below title in Google (improves CTR)
-    description: article.metaDescription || `Read "${article.title}" on BLOGGER.`,
+    description: article.metaDescription || `Read "${article.title}" and explore the full story.`,
 
     // CANONICAL URL: Tells Google this is the definitive URL for this content.
     // Prevents duplicate content penalties (e.g., if page is shared with ?ref=twitter).

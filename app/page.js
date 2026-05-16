@@ -27,7 +27,7 @@ async function getPublishedArticles() {
         image: true,
         metaDescription: true,
         createdAt: true,
-        content: true,  // Needed for reading time
+        readingTime: true,
       },
     });
   } catch (error) {

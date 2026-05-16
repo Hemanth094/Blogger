@@ -8,7 +8,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { getReadingTime } from "@/lib/readingTime";
 
 // Format a date nicely: "January 14, 2026"
 function formatDate(dateString) {
@@ -20,7 +19,7 @@ function formatDate(dateString) {
 }
 
 export default function ArticleCard({ article }) {
-  const readingTime = getReadingTime(article.content);
+  const readingTime = article.readingTime || "1 min read";
 
   return (
     <article className="group bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(124,58,237,0.1)] transition-all duration-500 border border-slate-100 flex flex-col h-full hover:-translate-y-2">

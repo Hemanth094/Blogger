@@ -83,26 +83,92 @@ export default function ArticleForm({ initialData = null, onSubmit, isLoading = 
     return Object.keys(newErrors).length === 0; // true = valid
   }
 
-  // ── Image Upload ─────────────────────────────
+  // ── Image Upload with Compression ──────────────────
   async function handleImageUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Check file size (still good to have a limit)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File is too large (max 10MB)");
+      return;
+    }
+
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
+      // 1. Create a promise-based image resizer
+      const compressedFile = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new window.Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+
+            // Max dimensions
+            const MAX_WIDTH = 1200;
+            const MAX_HEIGHT = 800;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Export as compressed blob
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  // Keep the original filename
+                  const newFile = new File([blob], file.name, {
+                    type: "image/jpeg",
+                    lastModified: Date.now(),
+                  });
+                  resolve(newFile);
+                } else {
+                  reject(new Error("Canvas blob creation failed"));
+                }
+              },
+              "image/jpeg",
+              0.7 // 70% quality
+            );
+          };
+          img.onerror = reject;
+        };
+        reader.onerror = reject;
+      });
+
+      // 2. Upload the compressed file
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
+      
       if (data.url) {
         setImage(data.url);
         setImagePreview(data.url);
       } else {
         alert(data.error || "Upload failed");
       }
-    } catch {
-      alert("Upload failed. Please try again.");
+    } catch (err) {
+      console.error("Compression/Upload error:", err);
+      alert("Failed to process image. Please try a different one.");
     } finally {
       setUploading(false);
     }
@@ -212,7 +278,7 @@ export default function ArticleForm({ initialData = null, onSubmit, isLoading = 
       content: content.trim(),
       image: image || null,
       metaTitle: metaTitle.trim() || `${title.trim().substring(0, 50)} | BLOGGER`,
-      metaDescription: metaDescription.trim() || `Read the full article about ${title.trim()} and more stories on BLOGGER.`,
+      metaDescription: metaDescription.trim() || `Read the full story about ${title.trim()} and discover more insightful articles.`,
       published,
       category,
     });

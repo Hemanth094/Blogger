@@ -19,11 +19,12 @@ model Article {
   title           String   @db.VarChar(255)             // Article title
   slug            String   @unique @db.VarChar(255)     // URL-friendly (unique) e.g. "my-first-post"
   content         String   @db.LongText                 // Full article body (can be very long)
-  image           String?  @db.VarChar(500)             // Optional cover image URL
+  image           String?  @db.LongText                 // Optional cover image URL (stores Base64 or URL)
   metaTitle       String?  @db.VarChar(60)              // SEO title (keep under 60 chars)
   metaDescription String?  @db.VarChar(160)             // SEO description (keep under 160 chars)
   published       Boolean  @default(false)              // Only published=true shows on public site
   category        String   @default("General") @db.VarChar(50) // e.g. Travel, Tech, Lifestyle
+  readingTime     String?  @db.VarChar(20)              // Estimated reading time (e.g. "5 min read")
   createdAt       DateTime @default(now())              // Auto-set when record is created
   updatedAt       DateTime @updatedAt                   // Auto-updated on every change
 }
