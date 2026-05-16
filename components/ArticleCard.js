@@ -85,6 +85,7 @@ export default function ArticleCard({ article }) {
         <div className="pt-5 border-t border-slate-50 flex items-center justify-between mt-auto">
           <Link
             href={`/articles/${article.slug}`}
+            aria-label={`Read more about ${article.title}`}
             className="inline-flex items-center gap-1.5 text-sm font-bold text-violet-600 group/link transition-all"
           >
             Read More

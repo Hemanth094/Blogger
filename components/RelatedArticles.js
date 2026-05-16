@@ -109,6 +109,7 @@ export default function RelatedArticles({ articles, currentSlug, currentTitle, c
               <div className="mt-auto pt-4 border-t border-slate-50">
                 <Link
                   href={`/articles/${article.slug}`}
+                  aria-label={`Read more about ${article.title}`}
                   className="inline-flex items-center gap-2 text-xs font-bold text-violet-600 group/btn"
                 >
                   Read Full Article
