@@ -38,7 +38,6 @@ async function getPublishedArticles() {
 }
 
 export const revalidate = 3600; // ISR: revalidate every hour
-export const dynamic = 'force-dynamic'; // Skip static generation, render on demand
 
 export default async function HomePage() {
   const articles = await getPublishedArticles();
@@ -71,7 +70,7 @@ export default async function HomePage() {
           </h1>
 
           <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-            Discover a clean, minimal space for thoughtful reading and high-performance storytelling. Optimized for SEO and reader engagement.
+            Discover a clean, minimal space for thoughtful reading and high-performance storytelling.
           </p>
 
           <div className="max-w-2xl mx-auto mb-16">

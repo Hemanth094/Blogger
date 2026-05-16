@@ -15,6 +15,7 @@
 //
 // 3. notFound() — Shows a proper 404 page if the slug doesn't exist.
 
+import { cache } from 'react';
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,23 +26,23 @@ import RelatedArticles from "@/components/RelatedArticles";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-export const dynamic = 'force-dynamic'; // Skip static generation, render on demand
-
 // ── Fetch a single article by slug ──────────────
-async function getArticle(slug) {
+// cache() ensures we only hit the DB once per request, even if 
+// generateMetadata and the Page component both call this.
+const getArticle = cache(async (slug) => {
   try {
     const article = await prisma.article.findUnique({
-      where: { slug, published: true }, // Only show published articles publicly
+      where: { slug, published: true },
     });
     return article;
   } catch (error) {
-    console.warn('Failed to fetch article (expected during build):', error.message);
+    console.warn('Failed to fetch article:', error.message);
     return null;
   }
-}
+});
 
-// ── Fetch related articles (all published, excluding current) ──
-async function getRelatedArticles(currentSlug) {
+// ── Fetch related articles ──────────────────────
+const getRelatedArticles = cache(async (currentSlug) => {
   try {
     return await prisma.article.findMany({
       where: { published: true, slug: { not: currentSlug } },
@@ -62,7 +63,7 @@ async function getRelatedArticles(currentSlug) {
     console.warn('Failed to fetch related articles:', error.message);
     return [];
   }
-}
+});
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
