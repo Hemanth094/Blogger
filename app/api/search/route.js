@@ -12,24 +12,28 @@ export async function GET(request) {
     return NextResponse.json({ results: [] });
   }
 
-  const articles = await prisma.article.findMany({
-    where: {
-      published: true,
-      OR: [
-        { title: { contains: q } },
-        { metaDescription: { contains: q } },
-      ],
-    },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      metaDescription: true,
-      createdAt: true,
-    },
-  });
+  try {
+    const articles = await prisma.article.findMany({
+      where: {
+        published: true,
+        OR: [
+          { title: { contains: q } },
+          { metaDescription: { contains: q } },
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        metaDescription: true,
+        createdAt: true,
+      },
+    });
 
-  return NextResponse.json({ results: articles });
+    return NextResponse.json({ results: articles });
+  } catch (error) {
+    return NextResponse.json({ results: [] });
+  }
 }

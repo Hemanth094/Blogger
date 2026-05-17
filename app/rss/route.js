@@ -70,7 +70,22 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("RSS feed error:", error);
-    return NextResponse.json({ error: "Failed to generate RSS feed" }, { status: 500 });
+    // Return empty RSS feed during build or DB downtime instead of failing
+    const emptyRss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>BLOGGER</title>
+    <link>${baseUrl}</link>
+    <description>The latest articles from BLOGGER</description>
+    <language>en-us</language>
+  </channel>
+</rss>`;
+
+    return new NextResponse(emptyRss, {
+      headers: {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
   }
 }

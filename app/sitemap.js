@@ -28,7 +28,7 @@ export default async function sitemap() {
       orderBy: { updatedAt: "desc" },
     });
   } catch (error) {
-    console.warn('Failed to fetch articles for sitemap (expected during Vercel build):', error.message);
+    // Fail silently during build phase to prevent log pollution
   }
 
   // Static pages

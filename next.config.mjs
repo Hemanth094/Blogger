@@ -19,6 +19,27 @@ const nextConfig = {
 
   // Power the app with modern output
   output: "standalone",
+
+  // Reduce excessive worker concurrency during build to prevent DB connection pool exhaustion
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
+  },
+
+  // Security headers for production hardening
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

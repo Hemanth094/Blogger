@@ -39,6 +39,7 @@ export async function GET(request) {
           : {}),
       },
       orderBy: { createdAt: "desc" }, // Newest first
+      take: 100, // Limit results to prevent memory overload on large databases
       // Only select the fields we need for listing (not full content)
       select: {
         id: true,

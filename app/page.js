@@ -10,16 +10,18 @@
 // - Better SEO: Google can read the content immediately
 // - Secure: Database credentials stay on the server
 
+import { cache } from "react";
 import prisma from "@/lib/prisma";
 import ArticleCard from "@/components/ArticleCard";
 import SearchBar from "@/components/SearchBar";
 
 // Fetch all PUBLISHED articles (server-side)
-async function getPublishedArticles() {
+const getPublishedArticles = cache(async () => {
   try {
     return await prisma.article.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
+      take: 10, // Limit fetched articles to improve load times and avoid DB exhaustion
       select: {
         id: true,
         title: true,
@@ -31,13 +33,12 @@ async function getPublishedArticles() {
       },
     });
   } catch (error) {
-    // During build, database may not be available. Return empty array.
-    console.warn('Failed to fetch articles (expected during build):', error.message);
+    // During build, database may not be available. Return empty array without polluting logs.
     return [];
   }
-}
+});
 
-export const revalidate = 3600; // ISR: revalidate every hour
+export const revalidate = 60; // ISR: revalidate every minute
 
 export default async function HomePage() {
   const articles = await getPublishedArticles();

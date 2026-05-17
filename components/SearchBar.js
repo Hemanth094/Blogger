@@ -33,7 +33,7 @@ export default function SearchBar({ initialValue = "" }) {
       return;
     }
 
-    // Debounce: wait 300ms after user stops typing
+    // Debounce: wait 500ms after user stops typing to reduce API spam
     setIsLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
@@ -46,7 +46,7 @@ export default function SearchBar({ initialValue = "" }) {
       } finally {
         setIsLoading(false);
       }
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(debounceRef.current);
   }, [query]);

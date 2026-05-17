@@ -36,7 +36,7 @@ const getArticle = cache(async (slug) => {
     });
     return article;
   } catch (error) {
-    console.warn('Failed to fetch article:', error.message);
+    // Fail silently during build phase
     return null;
   }
 });
@@ -60,7 +60,7 @@ const getRelatedArticles = cache(async (currentSlug) => {
       },
     });
   } catch (error) {
-    console.warn('Failed to fetch related articles:', error.message);
+    // Fail silently during build phase
     return [];
   }
 });

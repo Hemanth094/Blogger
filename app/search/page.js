@@ -7,6 +7,7 @@
 // We read it on the server, query the database, and return results.
 // No client-side JavaScript needed for the search itself!
 
+import { cache } from 'react';
 import prisma from "@/lib/prisma";
 import ArticleCard from "@/components/ArticleCard";
 import SearchBar from "@/components/SearchBar";
@@ -24,30 +25,36 @@ export async function generateMetadata({ searchParams }) {
   };
 }
 
-async function searchArticles(query) {
+const searchArticles = cache(async (query) => {
   if (!query || query.trim().length < 2) return [];
 
-  return prisma.article.findMany({
-    where: {
-      published: true,
-      OR: [
-        { title: { contains: query } },          // Match in title
-        { content: { contains: query } },         // Match in content
-        { metaDescription: { contains: query } }, // Match in meta description
-      ],
-    },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      image: true,
-      metaDescription: true,
-      createdAt: true,
-      content: true,
-    },
-  });
-}
+  try {
+    return await prisma.article.findMany({
+      where: {
+        published: true,
+        OR: [
+          { title: { contains: query } },          // Match in title
+          { content: { contains: query } },         // Match in content
+          { metaDescription: { contains: query } }, // Match in meta description
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20, // Limit search results to optimize performance
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        image: true,
+        metaDescription: true,
+        createdAt: true,
+        content: true, // Needed for search preview/results
+      },
+    });
+  } catch (error) {
+    // Fail gracefully instead of crashing the page if database is unreachable
+    return [];
+  }
+});
 
 export default async function SearchPage({ searchParams }) {
   const { q } = await searchParams;
